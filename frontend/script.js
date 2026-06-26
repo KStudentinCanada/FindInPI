@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const birthday = "20050131";
+const birthday = "20260101";
 
 // 문자열 읽기
 const pi = fs.readFileSync("pi.txt", "utf8");
