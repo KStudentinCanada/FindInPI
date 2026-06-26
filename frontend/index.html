@@ -1,1 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
 
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>π Birthday Search</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Nunito",sans-serif;
+}
+
+body{
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.container{
+    width:700px;
+    max-width:90%;
+    text-align:center;
+}
+
+.pi{
+    font-size:140px;
+    color:#d60000;
+    font-weight:900;
+}
+
+.title{
+    font-size:34px;
+    font-weight:900;
+    margin-bottom:35px;
+}
+
+input{
+    width:100%;
+    padding:16px;
+    border:3px solid #d60000;
+    border-radius:14px;
+    font-size:20px;
+    margin-bottom:20px;
+}
+
+button{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:14px;
+    background:#d60000;
+    color:white;
+    font-size:20px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#b00000;
+}
+
+.result{
+    margin-top:35px;
+    border:3px solid #d60000;
+    border-radius:14px;
+    padding:25px;
+    text-align:left;
+    line-height:2;
+    min-height:170px;
+    word-break:break-all;
+}
+
+.highlight{
+    color:#d60000;
+    font-weight:900;
+    font-size:24px;
+}
+
+.success{
+    color:#d60000;
+    font-size:22px;
+    font-weight:900;
+}
+
+.fail{
+    color:#d60000;
+    font-size:22px;
+    font-weight:900;
+    text-align:center;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="pi">π</div>
+
+<div class="title">
+Find Your Birthday in Pi
+</div>
+
+<input
+id="birthday"
+maxlength="8"
+placeholder="YYYYMMDD">
+
+<button onclick="searchPi()">
+SEARCH
+</button>
+
+<div id="result" class="result">
+π 데이터를 불러오는 중...
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
