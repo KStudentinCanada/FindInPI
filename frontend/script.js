@@ -1,31 +1,139 @@
-const fs = require("fs");
+// ======================================
+// PI BIRTHDAY FINDER
+// Frontend JavaScript
+// ======================================
 
-const birthday = "20260101";
+// HTML Elements
+const birthdayInput = document.getElementById("birthday");
+const searchBtn = document.getElementById("searchBtn");
 
-// 문자열 읽기
-const pi = fs.readFileSync("pi.txt", "utf8");
+const loadingSection = document.getElementById("loadingSection");
+const resultSection = document.getElementById("resultSection");
 
-const targets = [
-    { type: "YYYYMMDD", value: birthday },
-    { type: "YYMMDD", value: birthday.slice(2) },
-    { type: "MMDD", value: birthday.slice(4) }
-];
+const birthdayText = document.getElementById("birthdayText");
+const digitPosition = document.getElementById("digitPosition");
+const digitSnippet = document.getElementById("digitSnippet");
 
-for (const target of targets) {
+// Change this later if your backend URL changes
+const API_URL = "http://localhost:3000/search";
 
-    const index = pi.indexOf(target.value);
+// ======================================
+// Search Button
+// ======================================
 
-    if (index !== -1) {
+searchBtn.addEventListener("click", async () => {
 
-        console.log("검색 형식 :", target.type);
-        console.log("위치 :", index + 1);
+    const birthday = birthdayInput.value;
 
-        const before = pi.slice(Math.max(0, index - 5), index);
-        const after = pi.slice(index + target.value.length, index + target.value.length + 5);
-
-        console.log(`${before}[${target.value}]${after}`);
-        process.exit();
+    if (!birthday) {
+        alert("Please select your birthday.");
+        return;
     }
+
+    // Convert YYYY-MM-DD → MMDDYYYY
+    const formattedBirthday = formatBirthday(birthday);
+
+    // Show loading
+    showLoading();
+
+    try {
+
+        // ----------------------------------
+        // Send request to backend
+        // ----------------------------------
+
+        const response = await fetch(`${API_URL}?number=${formattedBirthday}`);
+
+        if (!response.ok) {
+            throw new Error("Server error.");
+        }
+
+        const data = await response.json();
+
+        hideLoading();
+
+        showResult(formattedBirthday, data);
+
+    } catch (error) {
+
+        hideLoading();
+
+        alert("Could not connect to the server.");
+
+        console.error(error);
+
+    }
+
+});
+
+// ======================================
+// Convert Birthday
+// YYYY-MM-DD -> MMDDYYYY
+// ======================================
+
+function formatBirthday(date) {
+
+    const [year, month, day] = date.split("-");
+
+    return `${month}${day}${year}`;
+
 }
 
-console.log("찾지 못했습니다.");
+// ======================================
+// Loading
+// ======================================
+
+function showLoading() {
+
+    loadingSection.classList.remove("hidden");
+
+    resultSection.classList.add("hidden");
+
+}
+
+function hideLoading() {
+
+    loadingSection.classList.add("hidden");
+
+}
+
+// ======================================
+// Display Result
+// ======================================
+
+function showResult(birthday, data) {
+
+    resultSection.classList.remove("hidden");
+
+    birthdayText.textContent = birthday;
+
+    if (data.found) {
+
+        digitPosition.textContent =
+            `Digit #${Number(data.position).toLocaleString()}`;
+
+        // If backend returns a snippet
+        if (data.snippet) {
+
+            digitSnippet.innerHTML = data.snippet;
+
+        } else {
+
+            digitSnippet.innerHTML =
+                "<em>Snippet will be available soon.</em>";
+
+        }
+
+    }
+
+    else {
+
+        digitPosition.textContent =
+            "Not found in the first 1,000,000 digits.";
+
+        digitSnippet.innerHTML =
+            "<em>No matching sequence found.</em>";
+
+    }
+
+}
