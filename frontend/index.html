@@ -1,136 +1,154 @@
 <!DOCTYPE html>
-<html lang="ko">
-
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>π Birthday Finder</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
 
-<title>π Birthday Search</title>
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
-
-<style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:"Nunito",sans-serif;
-}
-
-body{
-    background:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
-}
-
-.container{
-    width:700px;
-    max-width:90%;
-    text-align:center;
-}
-
-.pi{
-    font-size:140px;
-    color:#d60000;
-    font-weight:900;
-}
-
-.title{
-    font-size:34px;
-    font-weight:900;
-    margin-bottom:35px;
-}
-
-input{
-    width:100%;
-    padding:16px;
-    border:3px solid #d60000;
-    border-radius:14px;
-    font-size:20px;
-    margin-bottom:20px;
-}
-
-button{
-    width:100%;
-    padding:16px;
-    border:none;
-    border-radius:14px;
-    background:#d60000;
-    color:white;
-    font-size:20px;
-    font-weight:900;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#b00000;
-}
-
-.result{
-    margin-top:35px;
-    border:3px solid #d60000;
-    border-radius:14px;
-    padding:25px;
-    text-align:left;
-    line-height:2;
-    min-height:170px;
-    word-break:break-all;
-}
-
-.highlight{
-    color:#d60000;
-    font-weight:900;
-    font-size:24px;
-}
-
-.success{
-    color:#d60000;
-    font-size:22px;
-    font-weight:900;
-}
-
-.fail{
-    color:#d60000;
-    font-size:22px;
-    font-weight:900;
-    text-align:center;
-}
-
-</style>
-
+    <!-- Icons -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 
 <body>
 
-<div class="container">
+    <!-- Background -->
+    <div class="background"></div>
 
-<div class="pi">π</div>
+    <!-- Floating circles -->
+    <div class="circles">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
 
-<div class="title">
-Find Your Birthday in Pi
-</div>
+    <!-- Hero -->
+    <section class="hero">
 
-<input
-id="birthday"
-maxlength="8"
-placeholder="YYYYMMDD">
+        <div class="hero-content">
 
-<button onclick="searchPi()">
-SEARCH
-</button>
+            <h1>π Birthday Finder</h1>
 
-<div id="result" class="result">
-π 데이터를 불러오는 중...
-</div>
+            <p class="subtitle">
+                Discover where your birthday first appears
+                within the first <strong>1,000,000 digits of π</strong>.
+            </p>
 
-</div>
+            <!-- Search Card -->
+            <div class="search-card">
 
-<script src="script.js"></script>
+                <label>Select Your Birthday</label>
+
+                <input
+                    type="date"
+                    id="birthday"
+                >
+
+                <button id="searchBtn">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    Find My Birthday
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Loading -->
+    <section id="loadingSection" class="hidden">
+
+        <div class="loader"></div>
+
+        <h2>Searching through π...</h2>
+
+        <p class="loadingDigits">
+
+            3.14159265358979323846264338327950288419716939937510...
+
+        </p>
+
+    </section>
+
+    <!-- Result -->
+    <section id="resultSection" class="hidden">
+
+        <div class="result-card">
+
+            <h2>
+                🎉 Match Found!
+            </h2>
+
+            <div class="result-grid">
+
+                <div>
+
+                    <h3>Your Birthday</h3>
+
+                    <p id="birthdayText">
+                        --
+                    </p>
+
+                </div>
+
+                <div>
+
+                    <h3>First Appears At</h3>
+
+                    <p id="digitPosition">
+                        Digit #--
+                    </p>
+
+                </div>
+
+            </div>
+
+            <hr>
+
+            <h3>Nearby Digits</h3>
+
+            <div id="digitSnippet" class="snippet">
+
+                ...
+
+                <span class="highlight">
+
+                    07142008
+
+                </span>
+
+                ...
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+
+            Built with ❤️ using HTML, CSS, JavaScript & Node.js
+
+        </p>
+
+    </footer>
+
+    <script src="script.js"></script>
 
 </body>
-
 </html>
