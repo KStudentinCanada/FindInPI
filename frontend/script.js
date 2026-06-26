@@ -1,7 +1,9 @@
-// ======================================
+// =========================================
 // PI BIRTHDAY FINDER
 // Frontend JavaScript
-// ======================================
+// =========================================
+
+let pi = "";
 
 // HTML Elements
 const birthdayInput = document.getElementById("birthday");
@@ -14,74 +16,160 @@ const birthdayText = document.getElementById("birthdayText");
 const digitPosition = document.getElementById("digitPosition");
 const digitSnippet = document.getElementById("digitSnippet");
 
-// Change this later if your backend URL changes
-const API_URL = "http://localhost:3000/search";
+// =========================================
+// Load pi.txt
+// =========================================
 
-// ======================================
-// Search Button
-// ======================================
-
-searchBtn.addEventListener("click", async () => {
-
-    const birthday = birthdayInput.value;
-
-    if (!birthday) {
-        alert("Please select your birthday.");
-        return;
-    }
-
-    // Convert YYYY-MM-DD → MMDDYYYY
-    const formattedBirthday = formatBirthday(birthday);
-
-    // Show loading
-    showLoading();
+async function loadPi() {
 
     try {
 
-        // ----------------------------------
-        // Send request to backend
-        // ----------------------------------
+        const response = await fetch("pi.txt");
 
-        const response = await fetch(`${API_URL}?number=${formattedBirthday}`);
+        pi = await response.text();
 
-        if (!response.ok) {
-            throw new Error("Server error.");
-        }
+        console.log(`Loaded ${pi.length} digits of π`);
 
-        const data = await response.json();
+    }
 
-        hideLoading();
+    catch (error) {
 
-        showResult(formattedBirthday, data);
-
-    } catch (error) {
-
-        hideLoading();
-
-        alert("Could not connect to the server.");
+        alert("Unable to load pi.txt");
 
         console.error(error);
 
     }
 
-});
+}
 
-// ======================================
-// Convert Birthday
-// YYYY-MM-DD -> MMDDYYYY
-// ======================================
+loadPi();
 
-function formatBirthday(date) {
+// =========================================
+// Search Button
+// =========================================
 
-    const [year, month, day] = date.split("-");
+searchBtn.addEventListener("click", searchPi);
 
-    return `${month}${day}${year}`;
+// =========================================
+// Search
+// =========================================
+
+function searchPi() {
+
+    if (pi === "") {
+
+        alert("Pi is still loading. Please wait.");
+
+        return;
+
+    }
+
+    const rawDate = birthdayInput.value;
+
+    if (!rawDate) {
+
+        alert("Please choose your birthday.");
+
+        return;
+
+    }
+
+    // Convert:
+    // 2008-07-14
+    // ->
+    // 20080714
+
+    const birthday = rawDate.replace(/-/g, "");
+
+    const targets = [
+
+        {
+            type: "YYYYMMDD",
+            value: birthday
+        },
+
+        {
+            type: "YYMMDD",
+            value: birthday.slice(2)
+        },
+
+        {
+            type: "MMDD",
+            value: birthday.slice(4)
+        }
+
+    ];
+
+    showLoading();
+
+    // Small delay so loading animation is visible
+
+    setTimeout(() => {
+
+        performSearch(targets);
+
+    }, 600);
 
 }
 
-// ======================================
+// =========================================
+// Perform Search
+// =========================================
+
+function performSearch(targets) {
+
+    for (const target of targets) {
+
+        const index = pi.indexOf(target.value);
+
+        if (index !== -1) {
+
+            const start = index + 1;
+            const end = start + target.value.length - 1;
+
+            const before =
+                pi.slice(Math.max(0, index - 10), index);
+
+            const after =
+                pi.slice(
+                    index + target.value.length,
+                    index + target.value.length + 10
+                );
+
+            hideLoading();
+
+            showResult(
+                target,
+                start,
+                end,
+                before,
+                after
+            );
+
+            return;
+
+        }
+
+    }
+
+    hideLoading();
+
+    resultSection.classList.remove("hidden");
+
+    birthdayText.textContent =
+        birthdayInput.value;
+
+    digitPosition.textContent =
+        "Not found";
+
+    digitSnippet.innerHTML =
+        "<em>Your birthday wasn't found in the first 1,000,000 digits.</em>";
+
+}
+
+// =========================================
 // Loading
-// ======================================
+// =========================================
 
 function showLoading() {
 
@@ -97,43 +185,30 @@ function hideLoading() {
 
 }
 
-// ======================================
-// Display Result
-// ======================================
+// =========================================
+// Show Result
+// =========================================
 
-function showResult(birthday, data) {
+function showResult(target, start, end, before, after) {
 
     resultSection.classList.remove("hidden");
 
-    birthdayText.textContent = birthday;
+    birthdayText.textContent =
+        birthdayInput.value;
 
-    if (data.found) {
+    digitPosition.textContent =
+        `Digits ${start.toLocaleString()} - ${end.toLocaleString()}`;
 
-        digitPosition.textContent =
-            `Digit #${Number(data.position).toLocaleString()}`;
+    digitSnippet.innerHTML = `
 
-        // If backend returns a snippet
-        if (data.snippet) {
+${before}
+<span class="highlight">${target.value}</span>
+${after}
 
-            digitSnippet.innerHTML = data.snippet;
+<br><br>
 
-        } else {
+<strong>Matched Format:</strong> ${target.type}
 
-            digitSnippet.innerHTML =
-                "<em>Snippet will be available soon.</em>";
-
-        }
-
-    }
-
-    else {
-
-        digitPosition.textContent =
-            "Not found in the first 1,000,000 digits.";
-
-        digitSnippet.innerHTML =
-            "<em>No matching sequence found.</em>";
-
-    }
+`;
 
 }
