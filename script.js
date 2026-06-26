@@ -1,161 +1,104 @@
-// ======================================
-// PI BIRTHDAY FINDER
-// GitHub Pages Version
-// ======================================
-
-// HTML Elements
-const birthdayInput = document.getElementById("birthday");
-const searchBtn = document.getElementById("searchBtn");
-
-const loadingSection = document.getElementById("loadingSection");
-const resultSection = document.getElementById("resultSection");
-
-const birthdayText = document.getElementById("birthdayText");
-const digitPosition = document.getElementById("digitPosition");
-const digitSnippet = document.getElementById("digitSnippet");
-
-// Store pi digits
 let pi = "";
 
-// ======================================
-// Load pi.txt when page opens
-// ======================================
+async function loadPi(){
 
-async function loadPi() {
-    try {
+    try{
+
         const response = await fetch("pi.txt");
-
-        if (!response.ok) {
-            throw new Error("Could not load pi.txt");
-        }
 
         pi = await response.text();
 
-        console.log("Pi loaded successfully!");
+        document.getElementById("result").innerHTML =
+        "생일을 입력하고 SEARCH를 누르세요.";
+
     }
-    catch (error) {
-        alert("Could not load pi.txt.");
-        console.error(error);
+
+    catch(error){
+
+        document.getElementById("result").innerHTML =
+        "<div class='fail'>pi.txt를 불러올 수 없습니다.</div>";
+
     }
+
 }
 
 loadPi();
 
-// ======================================
-// Search Button
-// ======================================
+function searchPi(){
 
-searchBtn.addEventListener("click", () => {
+    if(pi==="") return;
 
-    if (pi.length === 0) {
-        alert("Pi is still loading. Please wait a few seconds.");
+    const birthday =
+    document.getElementById("birthday").value.trim();
+
+    if(!/^\d{8}$/.test(birthday)){
+
+        alert("YYYYMMDD 형식으로 입력하세요.");
+
         return;
+
     }
 
-    const birthday = birthdayInput.value;
+    const targets=[
 
-    if (!birthday) {
-        alert("Please select your birthday.");
-        return;
-    }
+        {
+            type:"YYYYMMDD",
+            value:birthday
+        },
 
-    const formattedBirthday = formatBirthday(birthday);
+        {
+            type:"YYMMDD",
+            value:birthday.slice(2)
+        },
 
-    showLoading();
+        {
+            type:"MMDD",
+            value:birthday.slice(4)
+        }
 
-    // Give loading animation a chance to appear
-    setTimeout(() => {
+    ];
 
-        const position = pi.indexOf(formattedBirthday);
+    for(const target of targets){
 
-        hideLoading();
+        const index = pi.indexOf(target.value);
 
-        if (position !== -1) {
+        if(index!=-1){
 
-            const start = Math.max(0, position - 15);
-            const end = Math.min(pi.length, position + formattedBirthday.length + 15);
+            const start=index+1;
+            const end=index+target.value.length;
 
-            const snippet =
-                pi.substring(start, position) +
-                "<strong>" +
-                formattedBirthday +
-                "</strong>" +
-                pi.substring(position + formattedBirthday.length, end);
+            const before=
+            pi.slice(Math.max(0,index-5),index);
 
-            showResult(formattedBirthday, {
-                found: true,
-                position: position + 1,
-                snippet: snippet
-            });
+            const after=
+            pi.slice(
+                index+target.value.length,
+                index+target.value.length+5
+            );
 
-        } else {
+            document.getElementById("result").innerHTML=`
 
-            showResult(formattedBirthday, {
-                found: false
-            });
+<div class="success">
+검색 성공!
+</div>
+
+<b>검색 형식</b> : ${target.type}<br>
+
+<b>위치</b> : ${start} ~ ${end}<br><br>
+
+${before}
+<span class="highlight">${target.value}</span>
+${after}
+
+`;
+
+            return;
 
         }
 
-    }, 100);
-
-});
-
-// ======================================
-// Convert Birthday
-// YYYY-MM-DD → MMDDYYYY
-// ======================================
-
-function formatBirthday(date) {
-
-    const [year, month, day] = date.split("-");
-
-    return `${month}${day}${year}`;
-
-}
-
-// ======================================
-// Loading
-// ======================================
-
-function showLoading() {
-
-    loadingSection.classList.remove("hidden");
-    resultSection.classList.add("hidden");
-
-}
-
-function hideLoading() {
-
-    loadingSection.classList.add("hidden");
-
-}
-
-// ======================================
-// Display Result
-// ======================================
-
-function showResult(birthday, data) {
-
-    resultSection.classList.remove("hidden");
-
-    birthdayText.textContent = birthday;
-
-    if (data.found) {
-
-        digitPosition.textContent =
-            `Digit #${data.position.toLocaleString()}`;
-
-        digitSnippet.innerHTML = data.snippet;
-
     }
-    else {
 
-        digitPosition.textContent =
-            "Not found in the digits of π.";
-
-        digitSnippet.innerHTML =
-            "<em>No matching sequence found.</em>";
-
-    }
+    document.getElementById("result").innerHTML=
+    "<div class='fail'>찾지 못했습니다.</div>";
 
 }
