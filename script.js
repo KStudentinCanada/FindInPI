@@ -1,6 +1,6 @@
 // ======================================
 // PI BIRTHDAY FINDER
-// Frontend JavaScript
+// GitHub Pages Version
 // ======================================
 
 // HTML Elements
@@ -14,14 +14,43 @@ const birthdayText = document.getElementById("birthdayText");
 const digitPosition = document.getElementById("digitPosition");
 const digitSnippet = document.getElementById("digitSnippet");
 
-// Change this later if your backend URL changes
-const API_URL = "http://localhost:3000/search";
+// Store pi digits
+let pi = "";
+
+// ======================================
+// Load pi.txt when page opens
+// ======================================
+
+async function loadPi() {
+    try {
+        const response = await fetch("pi.txt");
+
+        if (!response.ok) {
+            throw new Error("Could not load pi.txt");
+        }
+
+        pi = await response.text();
+
+        console.log("Pi loaded successfully!");
+    }
+    catch (error) {
+        alert("Could not load pi.txt.");
+        console.error(error);
+    }
+}
+
+loadPi();
 
 // ======================================
 // Search Button
 // ======================================
 
-searchBtn.addEventListener("click", async () => {
+searchBtn.addEventListener("click", () => {
+
+    if (pi.length === 0) {
+        alert("Pi is still loading. Please wait a few seconds.");
+        return;
+    }
 
     const birthday = birthdayInput.value;
 
@@ -30,45 +59,50 @@ searchBtn.addEventListener("click", async () => {
         return;
     }
 
-    // Convert YYYY-MM-DD → MMDDYYYY
     const formattedBirthday = formatBirthday(birthday);
 
-    // Show loading
     showLoading();
 
-    try {
+    // Give loading animation a chance to appear
+    setTimeout(() => {
 
-        // ----------------------------------
-        // Send request to backend
-        // ----------------------------------
+        const position = pi.indexOf(formattedBirthday);
 
-        const response = await fetch(`${API_URL}?number=${formattedBirthday}`);
+        hideLoading();
 
-        if (!response.ok) {
-            throw new Error("Server error.");
+        if (position !== -1) {
+
+            const start = Math.max(0, position - 15);
+            const end = Math.min(pi.length, position + formattedBirthday.length + 15);
+
+            const snippet =
+                pi.substring(start, position) +
+                "<strong>" +
+                formattedBirthday +
+                "</strong>" +
+                pi.substring(position + formattedBirthday.length, end);
+
+            showResult(formattedBirthday, {
+                found: true,
+                position: position + 1,
+                snippet: snippet
+            });
+
+        } else {
+
+            showResult(formattedBirthday, {
+                found: false
+            });
+
         }
 
-        const data = await response.json();
-
-        hideLoading();
-
-        showResult(formattedBirthday, data);
-
-    } catch (error) {
-
-        hideLoading();
-
-        alert("Could not connect to the server.");
-
-        console.error(error);
-
-    }
+    }, 100);
 
 });
 
 // ======================================
 // Convert Birthday
-// YYYY-MM-DD -> MMDDYYYY
+// YYYY-MM-DD → MMDDYYYY
 // ======================================
 
 function formatBirthday(date) {
@@ -86,7 +120,6 @@ function formatBirthday(date) {
 function showLoading() {
 
     loadingSection.classList.remove("hidden");
-
     resultSection.classList.add("hidden");
 
 }
@@ -110,26 +143,15 @@ function showResult(birthday, data) {
     if (data.found) {
 
         digitPosition.textContent =
-            `Digit #${Number(data.position).toLocaleString()}`;
+            `Digit #${data.position.toLocaleString()}`;
 
-        // If backend returns a snippet
-        if (data.snippet) {
-
-            digitSnippet.innerHTML = data.snippet;
-
-        } else {
-
-            digitSnippet.innerHTML =
-                "<em>Snippet will be available soon.</em>";
-
-        }
+        digitSnippet.innerHTML = data.snippet;
 
     }
-
     else {
 
         digitPosition.textContent =
-            "Not found in the first 1,000,000 digits.";
+            "Not found in the digits of π.";
 
         digitSnippet.innerHTML =
             "<em>No matching sequence found.</em>";
